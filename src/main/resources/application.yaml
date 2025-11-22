@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: mission-center-service
+
+  # MySQL 配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/taskdb?serverTimezone=Asia/Taipei
+    username: taskuser
+    password: taskpass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+  # JPA 配置
+  jpa:
+    hibernate:
+      ddl-auto: none  # 使用 init.sql 初始化,不自動建表
+    show-sql: false
+    open-in-view: false  # 關閉 Open-In-View 模式（避免懶加載性能問題）
+
+  # Redis 配置
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 2
+        max-wait: -1ms
+
+  # Spring Cache 配置
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5分鐘 (任務進度)
+      cache-null-values: false
+
+# RocketMQ 配置
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: mission-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+  consumer:
+    pull-batch-size: 10
+
+# 服務端口
+server:
+  port: 8080
+
+# 日誌配置
+logging:
+  level:
+    root: INFO
+    com.example.demo: DEBUG
+    org.hibernate.orm.connections.pooling: WARN

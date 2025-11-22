@@ -1,0 +1,36 @@
+package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
+
+@Entity
+@Table(name = "user_game_launches")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserGameLaunch {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @Column(name = "game_id", nullable = false)
+    private Long gameId;
+
+    @Column(name = "first_launched_at", nullable = false, updatable = false)
+    private Date firstLaunchedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        firstLaunchedAt = new Date();
+    }
+}

@@ -1,0 +1,359 @@
+{
+	"info": {
+		"_postman_id": "mission-center-api-collection",
+		"name": "Mission Center API",
+		"description": "Mission Center Service API Collection - 30天任務系統",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.success && jsonData.data) {",
+							"        pm.collectionVariables.set(\"userId\", jsonData.data.userId);",
+							"        console.log(\"userId set to: \" + jsonData.data.userId);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{password}}\",\n    \"loginDate\": \"{{loginDate}}\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/login",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "login"]
+				},
+				"description": "用戶登錄 - 驗證用戶認證，記錄登錄事件，並返回用戶信息。登錄成功後會自動將 userId 設為變數。"
+			},
+			"response": [
+				{
+					"name": "Login Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\",\n    \"loginDate\": \"2025-11-22\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "login"]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Login successful\",\n    \"data\": {\n        \"userId\": 1,\n        \"username\": \"testuser\",\n        \"points\": 0\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Games",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/games",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "games"]
+				},
+				"description": "獲取所有可用的遊戲列表"
+			},
+			"response": [
+				{
+					"name": "Get Games Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/games",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "games"]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Games retrieved successfully\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Game A\",\n            \"description\": \"A fantastic game\"\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Game B\",\n            \"description\": \"Another great game\"\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Launch Game",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": {{userId}},\n    \"gameId\": {{gameId}}\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/launchGame",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "launchGame"]
+				},
+				"description": "記錄用戶啟動遊戲的事件"
+			},
+			"response": [
+				{
+					"name": "Launch Game Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1,\n    \"gameId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/launchGame",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "launchGame"]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Game launch recorded successfully\",\n    \"data\": \"User 1 launched game 1\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Play Game",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": {{userId}},\n    \"gameId\": {{gameId}}\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/play",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "play"]
+				},
+				"description": "記錄用戶遊戲會話，後端會隨機生成分數 (0-1000)"
+			},
+			"response": [
+				{
+					"name": "Play Game Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1,\n    \"gameId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/play",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "play"]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Game play recorded successfully\",\n    \"data\": {\n        \"userId\": 1,\n        \"gameId\": 1,\n        \"score\": 750\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Missions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/missions?userId={{userId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "missions"],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{userId}}"
+						}
+					]
+				},
+				"description": "獲取用戶的任務進度詳情，包含三項主要任務：\n1. 連續登入3天\n2. 啟動至少3個不同遊戲\n3. 進行至少3次遊戲且累計分數 > 1000\n\n## 回傳欄位說明\n\n### Mission 物件欄位\n- **type**: 任務類型識別碼 (如 CONSECUTIVE_LOGIN_3_DAYS, LAUNCH_3_GAMES, PLAY_3_SESSIONS_1000_POINTS)\n- **description**: 任務描述文字\n- **currentProgress**: 當前進度數值\n- **targetProgress**: 目標進度數值\n- **progressText**: 人類可讀的進度文字 (如 \"3 / 3 days\")\n- **completed**: 任務是否已完成 (true/false)\n- **completedAt**: 任務完成時間，未完成時為 null (ISO 8601 格式)\n- **extraInfo**: 額外資訊物件\n\n### extraInfo 內容\n- **loginMission.extraInfo.consecutiveDays**: 連續登入天數\n- **launchMission.extraInfo.uniqueGamesLaunched**: 已啟動的不同遊戲數量\n- **playMission.extraInfo.playCount**: 遊戲進行次數\n- **playMission.extraInfo.totalScore**: 累計總分數"
+			},
+			"response": [
+				{
+					"name": "Get Missions Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/missions?userId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "missions"],
+							"query": [
+								{
+									"key": "userId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Mission progress retrieved successfully\",\n    \"data\": {\n        \"userId\": 1,\n        \"loginMission\": {\n            \"type\": \"LOGIN_3_DAYS\",\n            \"description\": \"Log in for 3 consecutive days\",\n            \"currentProgress\": 2,\n            \"targetProgress\": 3,\n            \"progressText\": \"2 / 3 days\",\n            \"completed\": false,\n            \"completedAt\": null,\n            \"extraInfo\": {\n                \"consecutiveDays\": 2\n            }\n        },\n        \"launchMission\": {\n            \"type\": \"LAUNCH_3_GAMES\",\n            \"description\": \"Launch at least 3 different games\",\n            \"currentProgress\": 2,\n            \"targetProgress\": 3,\n            \"progressText\": \"2 / 3 games\",\n            \"completed\": false,\n            \"completedAt\": null,\n            \"extraInfo\": {\n                \"uniqueGamesLaunched\": 2\n            }\n        },\n        \"playMission\": {\n            \"type\": \"PLAY_3_SESSIONS_1000_POINTS\",\n            \"description\": \"Play at least 3 game sessions with combined score > 1,000 points\",\n            \"currentProgress\": 2,\n            \"targetProgress\": 3,\n            \"progressText\": \"2 plays, 1500 / 1,000 points\",\n            \"completed\": false,\n            \"completedAt\": null,\n            \"extraInfo\": {\n                \"playCount\": 2,\n                \"totalScore\": 1500\n            }\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Rewards",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/rewards?userId={{userId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "rewards"],
+					"query": [
+						{
+							"key": "userId",
+							"value": "{{userId}}"
+						}
+					]
+				},
+				"description": "獲取用戶的獎勵分配歷史記錄"
+			},
+			"response": [
+				{
+					"name": "Get Rewards Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/rewards?userId=1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "rewards"],
+							"query": [
+								{
+									"key": "userId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"success\": true,\n    \"message\": \"Reward history retrieved successfully\",\n    \"data\": [\n        {\n            \"period\": \"2025-11-22\",\n            \"points\": 777,\n            \"distributedAt\": \"2025-11-22T10:30:45\",\n            \"rewardType\": \"MISSION_COMPLETION\"\n        }\n    ]\n}"
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "test_user",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "password123",
+			"type": "string"
+		},
+		{
+			"key": "loginDate",
+			"value": "2025-11-22",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "gameId",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
