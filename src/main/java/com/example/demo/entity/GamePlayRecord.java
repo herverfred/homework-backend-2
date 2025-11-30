@@ -20,6 +20,9 @@ public class GamePlayRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "event_id", nullable = false, unique = true)
+    private String eventId;
+
     @Column(name = "user_id", nullable = false)
     private Long userId;
 

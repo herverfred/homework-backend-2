@@ -31,6 +31,7 @@ public class GamePlayService {
     private final UserRepository userRepository;
     private final GameService gameService;
     private final GamePlayRecordRepository gamePlayRecordRepository;
+    private final MissionService missionService;
     private RocketMQTemplate rocketMQTemplate;
 
     // RocketMQ topic for game play events
@@ -110,8 +111,9 @@ public class GamePlayService {
 
             @Override
             public void onException(Throwable e) {
-                log.error("Failed to send game play event for user: {}, game: {}, score: {}",
-                    event.getUserId(), event.getGameId(), event.getScore(), e);
+                log.error("Failed to send game play event, saving to outbox", e);
+                missionService.saveFailedMessage(GAME_PLAY_EVENT_TOPIC, "GAME_PLAY",
+                    event.getEventId(), event, e.getMessage());
             }
         });
         log.debug("Async game play event published for user: {}, game: {}, score: {} to topic: {}",
@@ -119,21 +121,18 @@ public class GamePlayService {
     }
 
     /**
-     * Record gameplay session
+     * Record gameplay session (idempotent)
+     * Uses INSERT IGNORE with eventId to prevent duplicate records on retry
      *
+     * @param eventId the event ID for idempotency
      * @param userId the user ID
      * @param gameId the game ID
      * @param score the score achieved
      */
     @Transactional
-    public void recordGamePlay(Long userId, Long gameId, Integer score) {
-        GamePlayRecord playRecord = GamePlayRecord.builder()
-            .userId(userId)
-            .gameId(gameId)
-            .score(score)
-            .build();
-
-        gamePlayRecordRepository.save(playRecord);
-        log.debug("Game play recorded for user: {}, game: {}, score: {}", userId, gameId, score);
+    public void recordGamePlay(String eventId, Long userId, Long gameId, Integer score) {
+        gamePlayRecordRepository.insertIgnore(eventId, userId, gameId, score);
+        log.debug("Game play recorded for user: {}, game: {}, score: {}, eventId: {}",
+                  userId, gameId, score, eventId);
     }
 }

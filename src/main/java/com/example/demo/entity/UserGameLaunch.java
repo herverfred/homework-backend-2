@@ -26,11 +26,16 @@ public class UserGameLaunch {
     @Column(name = "game_id", nullable = false)
     private Long gameId;
 
-    @Column(name = "first_launched_at", nullable = false, updatable = false)
-    private Date firstLaunchedAt;
+    @Column(name = "launch_date", nullable = false)
+    @Temporal(TemporalType.DATE)
+    private Date launchDate;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Date createdAt;
 
     @PrePersist
     protected void onCreate() {
-        firstLaunchedAt = new Date();
+        launchDate = new Date();
+        createdAt = new Date();
     }
 }

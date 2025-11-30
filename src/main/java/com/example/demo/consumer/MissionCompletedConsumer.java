@@ -76,8 +76,8 @@ public class MissionCompletedConsumer implements RocketMQListener<MissionComplet
         } catch (Exception e) {
             log.error("Error processing mission completed event: userId={}, missionType={}",
                 event.getUserId(), event.getMissionType(), e);
-            // Don't throw exception - RocketMQ will retry automatically
-            // Log the error for monitoring and troubleshooting
+            // Must re-throw exception for RocketMQ to retry the message
+            throw new RuntimeException("Failed to process mission completed event", e);
         }
     }
 

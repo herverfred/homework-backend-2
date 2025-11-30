@@ -26,6 +26,10 @@ public class Mission {
     @Column(name = "mission_type", nullable = false, length = 50)
     private String missionType;
 
+    @Column(name = "cycle_start_date", nullable = false)
+    @Temporal(TemporalType.DATE)
+    private Date cycleStartDate;
+
     @Column(name = "is_completed", nullable = false)
     @Builder.Default
     private Boolean isCompleted = false;

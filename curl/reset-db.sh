@@ -11,6 +11,9 @@ docker exec mysql mysql -utaskuser -ptaskpass taskdb -e "
 -- Clear reward records
 DELETE FROM mission_rewards;
 
+-- Clear message outbox (failed message compensation)
+DELETE FROM message_outbox;
+
 -- Clear mission records
 DELETE FROM missions;
 

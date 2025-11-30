@@ -29,6 +29,7 @@ public class GameLaunchService {
     private final UserRepository userRepository;
     private final GameService gameService;
     private final UserGameLaunchRepository gameLaunchRepository;
+    private final MissionService missionService;
     private RocketMQTemplate rocketMQTemplate;
 
     // RocketMQ topic for game launch events
@@ -98,8 +99,9 @@ public class GameLaunchService {
 
             @Override
             public void onException(Throwable e) {
-                log.error("Failed to send game launch event for user: {}, game: {}",
-                    event.getUserId(), event.getGameId(), e);
+                log.error("Failed to send game launch event, saving to outbox", e);
+                missionService.saveFailedMessage(GAME_LAUNCH_EVENT_TOPIC, "GAME_LAUNCH",
+                    event.getEventId(), event, e.getMessage());
             }
         });
         log.debug("Async game launch event published for user: {}, game: {} to topic: {}",

@@ -35,11 +35,13 @@ CREATE TABLE games (
 -- 3. Game Play Records Table
 CREATE TABLE games_play_record (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'Record ID',
+    event_id VARCHAR(64) NOT NULL COMMENT 'Event ID for idempotency',
     user_id BIGINT NOT NULL COMMENT 'User ID',
     game_id BIGINT NOT NULL COMMENT 'Game ID',
     score INT NOT NULL DEFAULT 0 COMMENT 'Score for this game session',
     played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Play time',
 
+    UNIQUE KEY uk_event_id (event_id),
     INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Game play records table';
 
@@ -50,13 +52,14 @@ CREATE TABLE missions (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'Mission ID',
     user_id BIGINT NOT NULL COMMENT 'User ID',
     mission_type VARCHAR(50) NOT NULL COMMENT 'Mission type: LOGIN_CONSECUTIVE, LAUNCH_GAMES, PLAY_SCORE',
+    cycle_start_date DATE NOT NULL COMMENT 'Start date of 30-day cycle',
     is_completed BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Is completed',
     completed_at TIMESTAMP NULL COMMENT 'Completion time',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
 
-    UNIQUE KEY uk_user_mission (user_id, mission_type),
-    INDEX idx_user_completed (user_id, is_completed)
+    UNIQUE KEY uk_user_mission_cycle (user_id, mission_type, cycle_start_date),
+    INDEX idx_user_cycle (user_id, cycle_start_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='User missions table';
 
 -- ============================================
@@ -79,10 +82,12 @@ CREATE TABLE user_game_launches (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'Record ID',
     user_id BIGINT NOT NULL COMMENT 'User ID',
     game_id BIGINT NOT NULL COMMENT 'Game ID',
-    first_launched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'First launch time',
+    launch_date DATE NOT NULL COMMENT 'Launch date (date only)',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
 
-    UNIQUE KEY uk_user_game (user_id, game_id),
-    INDEX idx_user_id (user_id)
+    UNIQUE KEY uk_user_game_date (user_id, game_id, launch_date),
+    INDEX idx_user_id (user_id),
+    INDEX idx_launch_date (launch_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='User game launches table';
 
 -- ============================================
@@ -100,6 +105,26 @@ CREATE TABLE mission_rewards (
     INDEX idx_user_id (user_id),
     INDEX idx_period (reward_period)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Mission rewards table';
+
+-- ============================================
+
+-- 8. Message Outbox Table (for failed message compensation)
+CREATE TABLE message_outbox (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT 'Record ID',
+    event_id VARCHAR(64) NOT NULL COMMENT 'Unique event ID',
+    topic VARCHAR(100) NOT NULL COMMENT 'RocketMQ topic',
+    payload TEXT NOT NULL COMMENT 'JSON serialized message content',
+    event_type VARCHAR(50) NOT NULL COMMENT 'Event type: LOGIN, GAME_LAUNCH, GAME_PLAY, MISSION_COMPLETED',
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT 'Status: PENDING / FAILED',
+    retry_count INT NOT NULL DEFAULT 0 COMMENT 'Retry count',
+    max_retries INT NOT NULL DEFAULT 10 COMMENT 'Max retry attempts',
+    next_retry_at TIMESTAMP NOT NULL COMMENT 'Next retry time',
+    error_message VARCHAR(500) NULL COMMENT 'Last error message',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation time',
+
+    UNIQUE KEY uk_event_id (event_id),
+    INDEX idx_status_retry (status, next_retry_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Message outbox for failed message compensation';
 
 -- ============================================
 -- Initialize Test Data

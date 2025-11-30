@@ -29,6 +29,7 @@ public class LoginService {
 
     private final UserRepository userRepository;
     private final UserLoginRecordRepository loginRecordRepository;
+    private final MissionService missionService;
     private RocketMQTemplate rocketMQTemplate;
 
     // RocketMQ topic for login events
@@ -100,7 +101,9 @@ public class LoginService {
 
             @Override
             public void onException(Throwable e) {
-                log.error("Failed to send login event for userId: {}", event.getUserId(), e);
+                log.error("Failed to send login event, saving to outbox", e);
+                missionService.saveFailedMessage(LOGIN_EVENT_TOPIC, "LOGIN",
+                    event.getEventId(), event, e.getMessage());
             }
         });
         log.debug("Async login event published for userId: {} to topic: {}", userId, LOGIN_EVENT_TOPIC);

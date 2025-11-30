@@ -39,4 +39,14 @@ public interface UserLoginRecordRepository extends JpaRepository<UserLoginRecord
     @Modifying
     @Query(value = "INSERT IGNORE INTO user_login_records (user_id, login_date, created_at) VALUES (:userId, :loginDate, NOW())", nativeQuery = true)
     void insertIgnore(@Param("userId") Long userId, @Param("loginDate") Date loginDate);
+
+    /**
+     * Find login records within date range for consecutive day calculation
+     *
+     * @param userId the user ID
+     * @param sinceDate the start date (30 days ago)
+     * @return login records within range, ordered by date descending
+     */
+    @Query("SELECT u FROM UserLoginRecord u WHERE u.userId = :userId AND u.loginDate >= :sinceDate ORDER BY u.loginDate DESC")
+    List<UserLoginRecord> findByUserIdAndLoginDateAfter(@Param("userId") Long userId, @Param("sinceDate") Date sinceDate);
 }
